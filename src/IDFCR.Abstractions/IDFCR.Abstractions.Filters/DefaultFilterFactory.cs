@@ -75,7 +75,7 @@ internal class DefaultFilterFactory(IServiceProvider serviceProvider) : IFilterF
 
             if (filter.CanFilter(request))
             {
-                (query, _) = filter.Apply(query, request);
+                (query, totalEntries) = filter.Apply(query, request);
             }
         }
 
