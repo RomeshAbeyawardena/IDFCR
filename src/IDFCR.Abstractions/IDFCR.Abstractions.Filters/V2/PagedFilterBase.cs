@@ -28,7 +28,7 @@ public abstract class PagedFilterBase<TRequest, TDb> : FilterBase<TRequest, TDb>
         {
             if (!string.IsNullOrWhiteSpace(orderedRequest.OrderBy))
             {
-                query = query.OrderBy($"{orderedRequest.OrderBy} {orderedRequest.DefaultOrderDirection ?? OrderDirection.Ascending}");
+                query = query.OrderBy($"{orderedRequest.OrderBy}");
             }
         }
 
