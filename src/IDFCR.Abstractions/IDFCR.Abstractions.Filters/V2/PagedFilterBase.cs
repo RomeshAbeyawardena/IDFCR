@@ -24,19 +24,13 @@ public abstract class PagedFilterBase<TRequest, TDb> : FilterBase<TRequest, TDb>
     /// <returns>The query with paging applied.</returns>
     public virtual IQueryable<TDb> ApplyPaging(IQueryable<TDb> query, TRequest request)
     {
-        var pageSize = request.PageSize.GetValueOrDefault(25);
-
         if (request is IOrderedRequest orderedRequest)
         {
             if (!string.IsNullOrWhiteSpace(orderedRequest.OrderBy))
             {
-                query = query.OrderBy($"{orderedRequest.OrderBy} {orderedRequest.DefaultOrderDirection ?? OrderDirection.Ascending}");
+                query = query.OrderBy($"{orderedRequest.OrderBy}");
             }
         }
-
-        query = query
-            .Skip(request.PageIndex.GetValueOrDefault() * pageSize)
-            .Take(pageSize);
 
         return query;
     }
