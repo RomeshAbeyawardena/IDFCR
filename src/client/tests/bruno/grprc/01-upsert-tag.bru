@@ -1,0 +1,49 @@
+meta {
+  name: 01 Upsert Tag
+  type: grpc
+  seq: 1
+}
+
+grpc {
+  url: {{grpc_url}}
+  method: /buildtools.shared.contracts.grpc.feature.tags.UpsertTagCommandService/UpsertTag
+  body: grpc
+  protoPath: protos/buildtools-tags.proto
+  auth: inherit
+  methodType: unary
+}
+
+body:grpc {
+  name: message 1
+  content: '''
+  {
+    "tag": {
+      "name": "{{tag_name}}",
+      "display_name": "{{tag_display_name}}"
+    }
+  }
+  '''
+}
+
+script:post-response {
+  const result = res.body.result ?? {};
+  const isSuccess = result.isSuccess ?? result.is_success;
+  const tagId = res.body.tagId ?? res.body.tag_id ?? null;
+
+  bru.setVar('tag_id', tagId);
+  bru.setVar('tag_upsert_is_success', String(Boolean(isSuccess)));
+}
+
+tests {
+  test('upsert tag succeeds', function() {
+    const result = res.body.result ?? {};
+    const isSuccess = result.isSuccess ?? result.is_success;
+    expect(isSuccess).to.equal(true);
+  });
+
+  test('upsert tag returns an identifier', function() {
+    const tagId = res.body.tagId ?? res.body.tag_id;
+    expect(tagId).to.be.a('string');
+    expect(tagId.length).to.be.greaterThan(0);
+  });
+}

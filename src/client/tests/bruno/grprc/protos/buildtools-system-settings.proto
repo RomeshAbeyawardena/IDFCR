@@ -1,0 +1,92 @@
+syntax = "proto3";
+
+package buildtools.shared.contracts.grpc.feature.systemsettings;
+
+import "google/protobuf/timestamp.proto";
+
+message UnitResult {
+  bool is_success = 1;
+  UnitAction action = 2;
+  optional FailureReason failure_reason = 3;
+  string error_message = 4;
+}
+
+enum UnitAction {
+  UNIT_ACTION_NONE = 0;
+  UNIT_ACTION_ADD = 1;
+  UNIT_ACTION_GET = 2;
+  UNIT_ACTION_UPDATE = 3;
+  UNIT_ACTION_DELETE = 4;
+  UNIT_ACTION_PENDING = 5;
+  UNIT_ACTION_CONFLICT = 6;
+}
+
+enum FailureReason {
+  FAILURE_REASON_NONE = 0;
+  FAILURE_REASON_NOT_FOUND = 1;
+  FAILURE_REASON_CONFLICT = 2;
+  FAILURE_REASON_VALIDATION_ERROR = 3;
+  FAILURE_REASON_UNAUTHORIZED = 4;
+  FAILURE_REASON_FORBIDDEN = 5;
+  FAILURE_REASON_INTERNAL_ERROR = 6;
+  FAILURE_REASON_EXTERNAL_DEPENDENCY_ERROR = 7;
+  FAILURE_REASON_AUTHORIZATION_ERROR = 8;
+  FAILURE_REASON_UNKNOWN = 99;
+}
+
+enum OrderDirection {
+  ORDERDIRECTION_ASCENDING = 0;
+  ORDERDIRECTION_NONE = 1;
+  ORDERDIRECTION_DESCENDING = 2;
+}
+
+message SortOrder {
+  string field_name = 1;
+  int32 order = 2;
+  OrderDirection direction = 3;
+}
+
+message GetPagedSettingsQuery {
+  repeated SortOrder ordered_fields = 1;
+  string environment = 2;
+  string key = 3;
+  string key_contains = 4;
+  string type = 5;
+  int32 page_size = 6;
+  int32 page_index = 7;
+}
+
+message SettingDto {
+  string id = 1;
+  string environment = 2;
+  string key = 3;
+  string value = 4;
+  string type = 5;
+  google.protobuf.Timestamp modified = 6;
+}
+
+message GetPagedSettingsQueryResult {
+  UnitResult result = 1;
+  repeated SettingDto settings = 2;
+  int32 total_rows = 3;
+  int32 total_pages = 4;
+  int32 page_size = 5;
+  int32 page_index = 6;
+}
+
+message UpsertSettingCommand {
+  SettingDto setting = 1;
+}
+
+message UpsertSettingCommandResult {
+  UnitResult result = 1;
+  string setting_id = 2;
+}
+
+service GetPagedSettingsQueryService {
+  rpc GetPagedSettings(GetPagedSettingsQuery) returns (GetPagedSettingsQueryResult);
+}
+
+service UpsertSettingCommandService {
+  rpc UpsertSetting(UpsertSettingCommand) returns (UpsertSettingCommandResult);
+}

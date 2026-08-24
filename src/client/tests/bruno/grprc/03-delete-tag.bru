@@ -1,0 +1,31 @@
+meta {
+  name: 03 Delete Tag
+  type: grpc
+  seq: 3
+}
+
+grpc {
+  url: {{grpc_url}}
+  method: /buildtools.shared.contracts.grpc.feature.tags.DeleteTagCommandService/DeleteTag
+  body: grpc
+  protoPath: protos/buildtools-tags.proto
+  auth: inherit
+  methodType: unary
+}
+
+body:grpc {
+  name: message 1
+  content: '''
+  {
+    "name": "{{tag_name}}",
+    "commit_changes": true
+  }
+  '''
+}
+
+tests {
+  test('delete tag succeeds', function() {
+    const isSuccess = res.body.isSuccess ?? res.body.is_success;
+    expect(isSuccess).to.equal(true);
+  });
+}

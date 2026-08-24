@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "BuildTools gRPC E2E",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}

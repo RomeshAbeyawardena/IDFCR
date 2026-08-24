@@ -1,0 +1,44 @@
+meta {
+  name: 06 Get Paged Settings
+  type: grpc
+  seq: 6
+}
+
+grpc {
+  url: {{grpc_url}}
+  method: /buildtools.shared.contracts.grpc.feature.systemsettings.GetPagedSettingsQueryService/GetPagedSettings
+  body: grpc
+  protoPath: protos/buildtools-system-settings.proto
+  auth: inherit
+  methodType: unary
+}
+
+body:grpc {
+  name: message 1
+  content: '''
+  {
+    "environment": "{{setting_environment}}",
+    "key": "{{setting_key}}",
+    "type": "{{setting_type}}",
+    "page_size": 10,
+    "page_index": 0
+  }
+  '''
+}
+
+tests {
+  test('get paged settings succeeds', function() {
+    const result = res.body.result ?? {};
+    const isSuccess = result.isSuccess ?? result.is_success;
+    expect(isSuccess).to.equal(true);
+  });
+
+  test('get paged settings returns the upserted setting', function() {
+    const settings = res.body.settings ?? [];
+    const expectedKey = bru.getVar('setting_key');
+    const expectedEnvironment = bru.getVar('setting_environment');
+    const found = settings.some((setting) => setting.key === expectedKey && setting.environment === expectedEnvironment);
+
+    expect(found).to.equal(true);
+  });
+}

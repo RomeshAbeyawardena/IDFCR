@@ -1,0 +1,48 @@
+meta {
+  name: 02 Get Paged Tags
+  type: grpc
+  seq: 2
+}
+
+grpc {
+  url: {{grpc_url}}
+  method: /buildtools.shared.contracts.grpc.feature.tags.GetPagedTagsQueryService/GetPagedTags
+  body: grpc
+  protoPath: protos/buildtools-tags.proto
+  auth: inherit
+  methodType: unary
+}
+
+body:grpc {
+  name: message 1
+  content: '''
+  {
+    "page_size": 10,
+    "page_index": 0,
+    "name": "{{tag_name}}"
+  }
+  '''
+}
+
+script:post-response {
+  const tags = res.body.tags ?? [];
+  const match = tags.find((tag) => tag.name === bru.getVar('tag_name'));
+
+  bru.setVar('queried_tag_id', match?.id ?? null);
+}
+
+tests {
+  test('get paged tags succeeds', function() {
+    const result = res.body.result ?? {};
+    const isSuccess = result.isSuccess ?? result.is_success;
+    expect(isSuccess).to.equal(true);
+  });
+
+  test('get paged tags returns the upserted tag', function() {
+    const tags = res.body.tags ?? [];
+    const tagName = bru.getVar('tag_name');
+    const found = tags.some((tag) => tag.name === tagName);
+
+    expect(found).to.equal(true);
+  });
+}

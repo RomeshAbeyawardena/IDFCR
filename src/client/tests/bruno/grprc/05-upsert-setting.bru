@@ -1,0 +1,51 @@
+meta {
+  name: 05 Upsert Setting
+  type: grpc
+  seq: 5
+}
+
+grpc {
+  url: {{grpc_url}}
+  method: /buildtools.shared.contracts.grpc.feature.systemsettings.UpsertSettingCommandService/UpsertSetting
+  body: grpc
+  protoPath: protos/buildtools-system-settings.proto
+  auth: inherit
+  methodType: unary
+}
+
+body:grpc {
+  name: message 1
+  content: '''
+  {
+    "setting": {
+      "environment": "{{setting_environment}}",
+      "key": "{{setting_key}}",
+      "value": "{{setting_value}}",
+      "type": "{{setting_type}}"
+    }
+  }
+  '''
+}
+
+script:post-response {
+  const result = res.body.result ?? {};
+  const isSuccess = result.isSuccess ?? result.is_success;
+  const settingId = res.body.settingId ?? res.body.setting_id ?? null;
+
+  bru.setVar('setting_id', settingId);
+  bru.setVar('setting_upsert_is_success', String(Boolean(isSuccess)));
+}
+
+tests {
+  test('upsert setting succeeds', function() {
+    const result = res.body.result ?? {};
+    const isSuccess = result.isSuccess ?? result.is_success;
+    expect(isSuccess).to.equal(true);
+  });
+
+  test('upsert setting returns an identifier', function() {
+    const settingId = res.body.settingId ?? res.body.setting_id;
+    expect(settingId).to.be.a('string');
+    expect(settingId.length).to.be.greaterThan(0);
+  });
+}

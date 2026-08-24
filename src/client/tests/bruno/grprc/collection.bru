@@ -1,0 +1,27 @@
+vars:pre-request {
+  grpc_url: https://localhost:52416
+  tag_name: "copilot-e2e-tag"
+  tag_display_name: "Copilot E2E Tag"
+  setting_environment: "bruno-e2e"
+  setting_key: "grpc:bruno:e2e"
+  setting_type: "string"
+  setting_value: "copilot-generated"
+}
+
+docs {
+  # BuildTools gRPC Bruno collection
+
+  Discovery summary for this repository:
+  - The checked-in gRPC API currently exposes **Tags** and **SystemSettings** services.
+  - No ticket gRPC service or SAS/storage follow-up endpoint was found in the current source tree.
+  - These requests therefore exercise the actual end-to-end gRPC surface implemented by `BuildTools.gRPC.Api`.
+
+  Start the API locally before running the collection:
+
+  ```
+  cd src/BuildTools/Backend/BuildTools.gRPC.Api
+  dotnet run
+  ```
+
+  Update `grpc_url` above if you are running on a different endpoint.
+}

@@ -1,0 +1,41 @@
+meta {
+  name: 04 Get Paged Tags After Delete
+  type: grpc
+  seq: 4
+}
+
+grpc {
+  url: {{grpc_url}}
+  method: /buildtools.shared.contracts.grpc.feature.tags.GetPagedTagsQueryService/GetPagedTags
+  body: grpc
+  protoPath: protos/buildtools-tags.proto
+  auth: inherit
+  methodType: unary
+}
+
+body:grpc {
+  name: message 1
+  content: '''
+  {
+    "page_size": 10,
+    "page_index": 0,
+    "name": "{{tag_name}}"
+  }
+  '''
+}
+
+tests {
+  test('get paged tags after delete succeeds', function() {
+    const result = res.body.result ?? {};
+    const isSuccess = result.isSuccess ?? result.is_success;
+    expect(isSuccess).to.equal(true);
+  });
+
+  test('deleted tag is no longer returned', function() {
+    const tags = res.body.tags ?? [];
+    const tagName = bru.getVar('tag_name');
+    const found = tags.some((tag) => tag.name === tagName);
+
+    expect(found).to.equal(false);
+  });
+}
