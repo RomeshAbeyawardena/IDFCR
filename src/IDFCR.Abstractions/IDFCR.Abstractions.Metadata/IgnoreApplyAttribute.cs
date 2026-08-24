@@ -1,4 +1,4 @@
-namespace IDFCR.Abstractions.Persistence.Extensions;
+namespace IDFCR.Abstractions.Metadata;
 
 /// <summary>
 /// Defines an attribute to mark properties or fields to be ignored during the Apply operation in ObjectExtensions.

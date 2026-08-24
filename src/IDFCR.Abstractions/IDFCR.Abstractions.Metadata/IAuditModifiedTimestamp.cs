@@ -8,5 +8,6 @@ public interface IAuditModifiedTimestamp
     /// <summary>
     /// Gets or sets the UTC timestamp of when the entity was last modified. This property is used for auditing purposes to track the modification time of the entity. It should be updated to the current UTC time whenever the entity undergoes changes to ensure accurate historical records. The ModifiedTimestampUtc property provides a standardized way to capture and store modification timestamps across different implementations, facilitating consistent auditing and logging practices in applications and systems that implement this interface.
     /// </summary>
+    [IgnoreApply]
     DateTimeOffset? ModifiedTimestampUtc { get; set; }
 }

@@ -1,3 +1,4 @@
+using IDFCR.Abstractions.Metadata;
 using System.Collections.Concurrent;
 using System.Linq.Expressions;
 
@@ -42,7 +43,13 @@ public static class ObjectExtensions
 
         foreach (var targetProp in targetType.GetProperties().Where(p => p.CanWrite))
         {
-            if (targetProp.IsDefined(typeof(IgnoreApplyAttribute), true))
+            var isApplyIgnored = targetProp.IsDefined(typeof(IgnoreApplyAttribute), true)
+                || targetType.GetInterfaces()
+                    .Select(interfaceType => interfaceType.GetProperty(targetProp.Name))
+                    .Any(interfaceProperty => interfaceProperty?.PropertyType == targetProp.PropertyType
+                        && interfaceProperty.IsDefined(typeof(IgnoreApplyAttribute), true));
+
+            if (isApplyIgnored)
             {
                 continue;
             }

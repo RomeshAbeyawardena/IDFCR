@@ -102,6 +102,34 @@ public class RepositoryTests
     }
 
     [Test]
+    public async Task UpsertAsync_Update_WithDefaultCreatedTimestamp_ShouldPreserveCreatedTimestamp()
+    {
+        var insertResult = await _mockRepository.UpsertAsync(new Customer { FirstName = "Alice" }, CancellationToken.None);
+        var id = insertResult.GetResultOrDefault();
+        var originalCreatedTimestamp = _timeProvider.GetUtcNow();
+
+        _timeProvider.Advance(TimeSpan.FromHours(1));
+
+        var updateResult = await _mockRepository.UpsertAsync(new Customer
+        {
+            Id = id,
+            FirstName = "Bob",
+            CreatedTimestampUtc = default
+        }, CancellationToken.None);
+
+        Assert.That(updateResult.IsSuccess, Is.True, $"Internal error: {updateResult.Exception?.Message}");
+
+        var updated = (await _mockRepository.FindAsync(id, CancellationToken.None)).GetResultOrDefault();
+        Assert.That(updated, Is.Not.Null);
+
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(updated!.CreatedTimestampUtc, Is.EqualTo(originalCreatedTimestamp));
+            Assert.That(updated.ModifiedTimestampUtc, Is.EqualTo(_timeProvider.GetUtcNow()));
+        }
+    }
+
+    [Test]
     public async Task GetPaged_Should_Filter_By_NameContains_And_Return_Correct_Total()
     {
         await _mockRepository.UpsertAsync(new Customer { FirstName = "Alice", LastName = "Smith" }, default);

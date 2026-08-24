@@ -227,14 +227,14 @@ namespace IDFCR.Abstractions.Persistence
             try
             {
                 string resultName = $"{EntityName ?? ComputedEntityName}Id";
-                var dbValue = Map(entry) ?? throw new InvalidOperationException($"Mapping from {typeof(T)} to {typeof(TDb)} failed");
+                var valueToApply = Map(entry) ?? throw new InvalidOperationException($"Mapping from {typeof(T)} to {typeof(TDb)} failed");
                 RepositoryInterceptorContext context;
                 TKey id;
 
-                if (EqualityComparer<TKey>.Default.Equals(dbValue.Id, default))
+                if (EqualityComparer<TKey>.Default.Equals(valueToApply.Id, default))
                 {
                     context = await InvokeInterceptorsAsync(EntityContextBehaviorStage.Pre,
-                        EntityContextBehavior.Insert, dbValue, null, cancellationToken);
+                        EntityContextBehavior.Insert, valueToApply, null, cancellationToken);
 
                     if (context.BypassOperation)
                     {
@@ -242,29 +242,29 @@ namespace IDFCR.Abstractions.Persistence
                             .AddMeta("bypassed", true).As<TKey>();
                     }
 
-                    id = await OnAddAsync(dbValue, entry, cancellationToken);
+                    id = await OnAddAsync(valueToApply, entry, cancellationToken);
 
                     await InvokeInterceptorsAsync(EntityContextBehaviorStage.Post,
-                        EntityContextBehavior.Insert, dbValue, null, cancellationToken);
+                        EntityContextBehavior.Insert, valueToApply, null, cancellationToken);
 
                     var addedResult = UnitResult.FromResult(id, UnitAction.Add, namedResult: resultName);
 
-                    addedResult.AddMeta(Meta.CurrentEntityState, Map(dbValue));
+                    addedResult.AddMeta(Meta.CurrentEntityState, Map(valueToApply));
 
                     return addedResult;
                 }
 
-                foundEntry = await OnFindAsync(dbValue.Id, true, cancellationToken);
+                foundEntry = await OnFindAsync(valueToApply.Id, true, cancellationToken);
 
                 if (foundEntry is null)
                 {
-                    return UnitResult.NotFound<TKey>(dbValue.Id, new EntityNotFoundException(typeof(T), dbValue.Id));
+                    return UnitResult.NotFound<TKey>(valueToApply.Id, new EntityNotFoundException(typeof(T), valueToApply.Id));
                 }
 
                 var oldEntry = foundEntry.Map<TDb>() ?? throw new NullReferenceException(ErrorMessages.MappingFailure);
 
                 var clonedEntity = foundEntry.Map<TDb>() ?? throw new NullReferenceException(ErrorMessages.MappingFailure);
-                clonedEntity.Apply(dbValue);
+                clonedEntity.Apply(valueToApply);
 
                 if (!HasChanges(clonedEntity, foundEntry))
                 {
@@ -274,14 +274,14 @@ namespace IDFCR.Abstractions.Persistence
 
                 OnUpdate(foundEntry, entry);
 
-                foundEntry.Apply(dbValue);
+                foundEntry.Apply(valueToApply);
 
                 context = await InvokeInterceptorsAsync(EntityContextBehaviorStage.Pre,
                     EntityContextBehavior.Update, foundEntry, clonedEntity, cancellationToken);
 
                 if (context.BypassOperation)
                 {
-                    return UnitResult.FromResult(dbValue.Id, UnitAction.None)
+                    return UnitResult.FromResult(valueToApply.Id, UnitAction.None)
                         .AddMeta("bypassed", true).As<TKey>();
                 }
 
@@ -291,7 +291,7 @@ namespace IDFCR.Abstractions.Persistence
 
                 var result = UnitResult.FromResult(id, UnitAction.Update, namedResult: resultName);
 
-                result.AddMeta(Meta.CurrentEntityState, Map(dbValue));
+                result.AddMeta(Meta.CurrentEntityState, Map(valueToApply));
                 return result;
             }
             catch (Exception exception)
