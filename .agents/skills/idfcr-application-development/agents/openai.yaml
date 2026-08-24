@@ -1,0 +1,4 @@
+interface:
+  display_name: "IDFCR Application Development"
+  short_description: "Build and extend applications using IDFCR conventions"
+  default_prompt: "Use $idfcr-application-development to implement this application task by reusing the available IDFCR components and conventions."
